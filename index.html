@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Iron Log">
+<title>NICO 50 Iron Log</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#08090d;--s1:#10111a;--s2:#181921;--s3:#20212c;
+  --b1:rgba(255,255,255,.07);--b2:rgba(255,255,255,.13);
+  --text:#e2e4f0;--muted:#52546a;
+  --lime:#a8d800;--lime2:rgba(168,216,0,.12);--lime3:rgba(168,216,0,.28);
+  --blue:#33aaff;--blue2:rgba(51,170,255,.1);
+  --orange:#ff8c2a;--orange2:rgba(255,140,42,.1);
+  --red:#ff4455;--red2:rgba(255,68,85,.1);
+  --green:#2ad98a;--green2:rgba(42,217,138,.1);
+  --purple:#aa55ff;--purple2:rgba(170,85,255,.1);
+  --gold:#f5a623;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;overflow:hidden}
+#app{height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative;overflow:hidden}
+.hdr{padding:max(env(safe-area-inset-top),14px) 16px 12px;background:var(--bg);border-bottom:1px solid var(--b1);flex-shrink:0}
+.hdr-eye{font-size:9px;letter-spacing:4px;color:var(--lime);font-weight:700;margin-bottom:2px}
+.hdr-row{display:flex;justify-content:space-between;align-items:flex-end}
+.hdr-title{font-size:26px;font-weight:900;letter-spacing:-1px;line-height:1}
+.hdr-title b{color:var(--lime)}
+.streak{display:flex;align-items:center;gap:5px;background:rgba(255,140,42,.12);border:1px solid rgba(255,140,42,.3);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--orange)}
+.tabs{display:flex;background:var(--s2);border-radius:11px;padding:3px;margin:10px 14px 0;flex-shrink:0;gap:2px}
+.tab{flex:1;padding:7px 2px;border:none;border-radius:9px;cursor:pointer;font-size:10px;font-weight:700;transition:all .2s;background:transparent;color:var(--muted)}
+.tab.on{background:var(--s1);color:var(--lime);border:1px solid var(--lime2)}
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px 24px}
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:14px;margin-bottom:12px}
+.clbl{font-size:8px;letter-spacing:3px;color:var(--lime);font-weight:700;margin-bottom:12px;text-transform:uppercase}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sg2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.st{background:var(--s2);border-radius:10px;padding:10px;text-align:center}
+.sv{font-size:26px;font-weight:900;line-height:1}
+.sl{font-size:8px;color:var(--muted);margin-top:3px;letter-spacing:.5px}
+.pb{height:4px;background:var(--s3);border-radius:99px;overflow:hidden;margin-top:8px}
+.pf{height:100%;background:var(--lime);border-radius:99px;transition:width .5s}
+.prow{display:flex;gap:8px;align-items:center}
+.pinput{width:88px;padding:8px;border-radius:10px;border:1px solid var(--b2);background:var(--s2);color:var(--text);font-size:20px;font-weight:700;text-align:center;outline:none;-webkit-appearance:none}
+.sbtn{flex:1;padding:10px;background:var(--lime2);border:1px solid var(--lime3);color:var(--lime);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;text-align:center}
+.day{background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:11px 12px;margin-bottom:8px}
+.day.today{box-shadow:0 0 0 1.5px rgba(168,216,0,.3)}
+.dtop{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.dleft{flex:1;min-width:0}
+.dname{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700}
+.dtag{font-size:8px;background:rgba(168,216,0,.15);color:var(--lime);border-radius:3px;padding:1px 6px;font-weight:700}
+.ddate{font-size:9px;color:var(--muted);margin-top:1px}
+.dctrl{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.dsel{background:var(--s1);border:1px solid var(--b2);border-radius:7px;padding:4px 6px;color:var(--text);font-size:10px;font-weight:600;cursor:pointer;max-width:130px;outline:none}
+.vbtn{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--b2);background:var(--s1);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:all .2s}
+.dmeta{margin-top:7px;display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.dpill{font-size:10px;padding:2px 8px;border-radius:5px;font-weight:600;background:var(--s3);color:var(--muted)}
+.abdo-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.abdo-btn{padding:9px 6px;border-radius:10px;border:1.5px solid var(--b1);background:var(--s2);cursor:pointer;font-size:11px;font-weight:700;text-align:center;color:var(--muted);transition:all .15s}
+.abdo-btn.done{border-color:var(--green);background:var(--green2);color:var(--green)}
+.mov{position:absolute;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:flex-end;z-index:200}
+.mbox{background:var(--s1);border-radius:22px 22px 0 0;padding:20px;width:100%;max-height:90%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:max(env(safe-area-inset-bottom),20px)}
+.mhdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.mtitle{font-size:20px;font-weight:900;letter-spacing:-.5px}
+.msub{font-size:11px;color:var(--muted);margin-top:2px}
+.xcls{background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer;padding:2px;line-height:1}
+.flbl{font-size:8px;letter-spacing:2px;color:var(--muted);font-weight:700;margin-bottom:6px;text-transform:uppercase}
+.exo-item{background:var(--s2);border-radius:12px;padding:12px;margin-bottom:8px;border-left:3px solid transparent;transition:opacity .2s}
+.exo-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+.exo-name{font-size:13px;font-weight:700;flex:1}
+.exo-dose{font-size:11px;font-weight:700;color:var(--lime);white-space:nowrap}
+.exo-cue{font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:6px}
+.exo-prev{font-size:10px;color:var(--blue);margin-bottom:6px}
+.elas-mini{display:flex;gap:5px}
+.em{width:28px;height:28px;border-radius:7px;border:1.5px solid var(--b2);background:var(--s1);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.vid-btn{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:#cc0000;color:#fff;border-radius:5px;font-size:10px;font-weight:700;text-decoration:none}
+.exo-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--b2);background:var(--s1);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.exo-check.done{background:var(--green2);border-color:var(--green);color:var(--green)}
+.ngrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.nbox label{display:block;font-size:8px;letter-spacing:2px;color:var(--muted);font-weight:700;margin-bottom:4px;text-transform:uppercase}
+.nbox input{width:100%;padding:9px;border-radius:10px;border:1px solid var(--b2);background:var(--s2);color:var(--text);font-size:20px;font-weight:700;text-align:center;outline:none;-webkit-appearance:none;font-family:inherit}
+.note-ta{width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--b2);background:var(--s2);color:var(--text);font-size:13px;font-family:inherit;resize:none;outline:none;margin-bottom:14px}
+.mbtns{display:grid;grid-template-columns:1fr 2fr;gap:8px}
+.cbtn{padding:11px;border-radius:11px;border:1px solid var(--b2);background:transparent;color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.okbtn{padding:11px;border-radius:11px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.chrono{background:var(--s2);border-radius:12px;padding:14px;text-align:center;margin-bottom:14px}
+.ctime{font-size:52px;font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:10px}
+.cbtns{display:flex;gap:8px;justify-content:center}
+.cplay{padding:9px 22px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border:none}
+.creset{padding:9px 14px;border-radius:10px;border:1px solid var(--b2);background:transparent;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.sgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px}
+.ssbtn{padding:9px 4px;border-radius:10px;border:2px solid var(--b1);background:var(--s2);cursor:pointer;font-size:12px;font-weight:700;text-align:center;color:var(--muted);transition:all .15s}
+.ssbtn.on{border-color:var(--lime);background:var(--lime2);color:var(--lime)}
+.repos-ov{position:absolute;inset:0;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:300}
+.repos-t{font-size:80px;font-weight:900;color:var(--lime);letter-spacing:-3px;line-height:1}
+.repos-l{font-size:14px;color:var(--muted);margin-top:8px;letter-spacing:1px;text-align:center;max-width:200px}
+.repos-skip{margin-top:20px;padding:10px 28px;border-radius:12px;border:1px solid var(--b2);background:transparent;color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.rtabs{display:flex;background:var(--s2);border-radius:10px;padding:3px;margin-bottom:12px;gap:2px}
+.rtab{flex:1;padding:7px 4px;border:none;border-radius:8px;cursor:pointer;font-size:9px;font-weight:700;background:transparent;color:var(--muted);font-family:inherit;transition:all .2s}
+.rtab.on{background:var(--s1);color:var(--lime)}
+.barchart{display:flex;gap:3px;align-items:flex-end;height:72px;margin-bottom:4px}
+.bw{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.bv{font-size:9px;font-weight:700;color:var(--lime);min-height:11px}
+.bbg{width:100%;background:var(--s3);border-radius:3px 3px 0 0;flex:1;position:relative;overflow:hidden}
+.bfill{position:absolute;bottom:0;left:0;right:0;background:var(--lime);transition:height .6s}
+.hrow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--b1)}
+.hrow:last-child{border-bottom:none}
+.hl{display:flex;align-items:center;gap:8px}
+.hico{font-size:16px}
+.hname{font-size:13px;font-weight:700}
+.hdate{font-size:10px;color:var(--muted);margin-top:1px}
+.hrr{font-size:11px;font-weight:700;color:var(--muted)}
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--b1)}
+.rrow:last-child{border-bottom:none}
+.rname{font-size:12px;font-weight:700;min-width:88px}
+.rbar{flex:1;margin:0 8px;height:3px;background:var(--s3);border-radius:99px;overflow:hidden}
+.rfill{height:100%;border-radius:99px}
+.rcnt{font-size:12px;font-weight:700;min-width:18px;text-align:right}
+.obj-banner{background:rgba(168,216,0,.05);border:1px solid rgba(168,216,0,.2);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+.cfov{position:absolute;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:300;padding:20px}
+.cfbox{background:var(--s1);border:1px solid rgba(255,68,85,.3);border-radius:18px;padding:22px;width:100%;max-width:320px}
+.sync{position:fixed;top:14px;right:14px;background:rgba(168,216,0,.15);border:1px solid rgba(168,216,0,.35);color:var(--lime);border-radius:8px;padding:4px 11px;font-size:10px;font-weight:700;z-index:400;opacity:0;transition:opacity .3s;pointer-events:none}
+.sync.show{opacity:1}
+.bnav{display:flex;background:var(--s1);border-top:1px solid var(--b1);flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0)}
+.nbtn{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:8px;font-weight:700;letter-spacing:.5px;padding:8px 0;transition:color .2s}
+.nbtn.on{color:var(--lime)}
+.nico{font-size:20px;line-height:1}
+.empty{text-align:center;padding:24px 0;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="hdr">
+  <div class="hdr-eye">NICO 50 · PROGRAMME</div>
+  <div class="hdr-row">
+    <div class="hdr-title">IRON <b>LOG</b></div>
+    <div id="streak-b" class="streak" style="display:none">&#x1F525; <span id="streak-v">0</span>j</div>
+  </div>
+</div>
+<div class="tabs">
+  <button class="tab on" onclick="showTab('semaine')">Semaine</button>
+  <button class="tab" onclick="showTab('abdos')">Abdos</button>
+  <button class="tab" onclick="showTab('rapports')">Stats</button>
+  <button class="tab" onclick="showTab('config')">Plus</button>
+</div>
+<div class="content" id="content">
+  <div id="v-semaine"></div>
+  <div id="v-abdos" style="display:none"></div>
+  <div id="v-rapports" style="display:none"></div>
+  <div id="v-config" style="display:none"></div>
+</div>
+<div class="mov" id="mov" style="display:none" onclick="closeMov(event)">
+  <div class="mbox" id="mbox"></div>
+</div>
+<div class="repos-ov" id="repos-ov" style="display:none">
+  <div style="font-size:13px;color:var(--muted);margin-bottom:8px;letter-spacing:1px">REPOS</div>
+  <div class="repos-t" id="repos-t">90</div>
+  <div class="repos-l" id="repos-l">Prochain exercice</div>
+  <button class="repos-skip" onclick="skipRepos()">Passer</button>
+</div>
+<div class="cfov" id="cf-ov" style="display:none">
+  <div class="cfbox">
+    <div style="font-size:18px;font-weight:900;margin-bottom:8px">Reinitialiser ?</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.6">Les seances et le planning de cette semaine seront supprimes.</div>
+    <div class="mbtns">
+      <button class="cbtn" onclick="document.getElementById('cf-ov').style.display='none'">Annuler</button>
+      <button class="okbtn" style="background:var(--red2);color:var(--red);border:1px solid rgba(255,68,85,.3)" onclick="doReset()">Confirmer</button>
+    </div>
+  </div>
+</div>
+<div class="sync" id="sync-b">Sauvegarde OK</div>
+<nav class="bnav">
+  <button class="nbtn on" id="nb-semaine" onclick="showTab('semaine')"><div class="nico">&#x1F4C5;</div>SEM.</button>
+  <button class="nbtn" id="nb-abdos" onclick="showTab('abdos')"><div class="nico">&#x1F9F1;</div>ABDOS</button>
+  <button class="nbtn" id="nb-rapports" onclick="showTab('rapports')"><div class="nico">&#x1F4C8;</div>STATS</button>
+  <button class="nbtn" id="nb-config" onclick="showTab('config')"><div class="nico">&#x2699;&#xFE0F;</div>PLUS</button>
+</nav>
+</div>
+<script>
+const ELAS=[
+  {id:"v",ico:"&#x1F7E2;",label:"VERT",  color:"#2ad98a",bg:"rgba(42,217,138,.12)"},
+  {id:"o",ico:"&#x1F7E0;",label:"ORANGE",color:"#ff8c2a",bg:"rgba(255,140,42,.12)"},
+  {id:"r",ico:"&#x1F534;",label:"ROUGE", color:"#ff4455",bg:"rgba(255,68,85,.12)"},
+  {id:"m",ico:"&#x1F500;",label:"MIXTE", color:"#aa55ff",bg:"rgba(170,85,255,.12)"},
+];
+
+const ABDOS=[
+  {id:"db",nom:"Dead bug",cue:"Dos colle au sol, bras/jambe opposes, transverse profond",dose:"3x10 alt.",repos:45,vid:"https://www.youtube.com/watch?v=zJMNbNYYrsY"},
+  {id:"hb",nom:"Hollow body hold",cue:"Bras derriere tete, jambes tendues, compression totale",dose:"3x20s",repos:30,vid:"https://www.youtube.com/watch?v=oEaRgZXVkIM"},
+  {id:"pl",nom:"Planche RKC",cue:"Serre fessiers + abdos + poings simultanement, gainage actif",dose:"3x30s",repos:30,vid:"https://www.youtube.com/watch?v=K0FlFt4FD4E"},
+  {id:"wc",nom:"Wood chop elastique",cue:"Fixe en haut, rotation diagonale vers le bas, obliques",dose:"3x12/cote",repos:45,vid:"https://www.youtube.com/watch?v=i-hVYySziaU"},
+];
+
+const S={
+  S1:{id:"S1",l:"PUSH LONG",e:"&#x1F4AA;",c:"#ff4455",bg:"rgba(255,68,85,.1)",d:"65 min",desc:"Pecs, Epaules, Triceps, Abdos",
+    blocs:[
+      {t:"MOBILITY",col:"#aa55ff",exos:[
+        {n:"World Greatest Stretch",cue:"Fente+rotation ciel 5s hold activation globale",dose:"6/cote",repos:0,vid:"https://www.youtube.com/watch?v=4MP8yZbxI1k"},
+      ]},
+      {t:"PECTORAUX",col:"#ff4455",exos:[
+        {n:"Pompes archer",cue:"Mains tres ecartees, descente 1 bras, 4s excentrique, RIR=1",dose:"4x6/cote",repos:90,vid:"https://www.youtube.com/watch?v=C7CT9zZId5w"},
+        {n:"Pompes pieds sureleves",cue:"Pieds sur chaise, 5s descente, pec superieur, RIR=2",dose:"3x10",repos:75,vid:"https://www.youtube.com/watch?v=OVRBYrjszy4"},
+        {n:"Pompes pause 2s en bas",cue:"Pause position basse, tension max etirement, RIR=2",dose:"3x8",repos:75,vid:"https://www.youtube.com/watch?v=MxVbNel13Ek"},
+        {n:"Chest fly elastique",cue:"Elastiques derriere soi, croisement bras devant, adduction",dose:"3x15",repos:45,vid:"https://www.youtube.com/watch?v=i-hVYySziaU"},
+      ]},
+      {t:"EPAULES",col:"#ff8c2a",exos:[
+        {n:"Elevations laterales elastique",cue:"Pied sur bande, bras hauteur epaule, 4s descente",dose:"4x15",repos:45,vid:"https://www.youtube.com/watch?v=AOcge5kTgJ4"},
+        {n:"Face pull elastique",cue:"Tire vers visage, rotation externe en fin, rhomboides",dose:"4x15",repos:45,vid:"https://www.youtube.com/watch?v=i-hVYySziaU"},
+      ]},
+      {t:"TRICEPS",col:"#ff4455",exos:[
+        {n:"Triceps extension overhead",cue:"Bande dans le dos, extension au-dessus, chef long, 3s exc.",dose:"3x12",repos:60,vid:"https://www.youtube.com/watch?v=FiUJ8jq1z1c"},
+        {n:"Dips entre 2 chaises",cue:"Corps droit triceps, 3s descente, RIR=2",dose:"3x10",repos:60,vid:"https://www.youtube.com/watch?v=MxVbNel13Ek"},
+      ]},
+      {t:"ABDOS",col:"#2ad98a",exos:[
+        {n:"Dead bug",cue:"Dos colle, transverse profond",dose:"3x10 alt.",repos:45,vid:"https://www.youtube.com/watch?v=zJMNbNYYrsY"},
+        {n:"Planche RKC",cue:"Serre tout, gainage actif",dose:"3x30s",repos:30,vid:"https://www.youtube.com/watch?v=K0FlFt4FD4E"},
+        {n:"Wood chop elastique",cue:"Rotation diagonale, obliques, taille",dose:"3x12/cote",repos:45,vid:"https://www.youtube.com/watch?v=i-hVYySziaU"},
+      ]},
+    ]
+  },
+  S2:{id:"S2",l:"PUSH COURT",e:"&#x1F4AA;",c:"#ff4455",bg:"rgba(255,68,85,.1)",d:"35 min",desc:"Pecs, Epaules",
+    blocs:[
+      {t:"PECTORAUX",col:"#ff4455",exos:[
+        {n:"Pompes archer",cue:"4s excentrique, RIR=1, 90s repos",dose:"4x6/cote",repos:90,vid:"https://www.youtube.com/watch?v=C7CT9zZId5w"},
+        {n:"Chest fly elastique",cue:"Croisement bras, 45s repos",dose:"3x15",repos:45,vid:"https://www.youtube.com/watch?v=i-hVYySziaU"},
+      ]},
+      {t:"EPAULES",col:"#ff8c2a",exos:[
+        {n:"Elevations laterales elastique",cue:"Pied sur bande, hauteur epaule, 45s repos",dose:"4x15",repos:45,vid:"https://www.youtube.com/watch?v=AOcge5kTgJ4"},
+        {n:"Face pull elastique",cue:"Rotation externe en fin, sante epaule",dose:"3x15",repos:45,vid:"https://www.youtube.com/watch?v=i-hVYySziaU"},
+      ]},
+    ]
+  },
+  S3:{id:"S3",l:"PULL LONG",e:"&#x1F519;",c:"#33aaff",bg:"rgba(51,170,255,.1)",d:"65 min",desc:"Dos, Biceps, Abdos",
+    blocs:[
+      {t:"DOS",col:"#33aaff",exos:[
+        {n:"Row assis elastique",cue:"Elastique pied table, tire coudes vers hanches, 75s repos",dose:"4x12",repos:75,vid:"https://www.youtube.com/watch?v=S1NIN1z4z9Q"},
+        {n:"Row unilateral debout",cue:"Un bras, coude vers hanche, meilleure activation dorsale",dose:"3x12/cote",repos:60,vid:"https://www.youtube.com/watch?v=S1NIN1z4z9Q"},
+        {n:"Superman en W",cue:"Sol, bras en W, serre omoplates 3s, erecteurs rhomboides",dose:"3x12",repos:60,vid:"https://www.youtube.com/watch?v=4MP8yZbxI1k"},
+      ]},
+      {t:"BICEPS",col:"#33aaff",exos:[
+        {n:"Curl biceps elastique",cue:"Pied sur bande, descente 3s, supine la main en haut",dose:"3x12",repos:60,vid:"https://www.youtube.com/watch?v=0sw0ta1G01E"},
+        {n:"Curl marteau elastique",cue:"Prise neutre, coudes fixes, controle excentrique 3s",dose:"3x12",repos:60,vid:"https://www.youtube.com/watch?v=0sw0ta1G01E"},
+      ]},
+      {t:"ABDOS",col:"#2ad98a",exos:[
+        {n:"Hollow body hold",cue:"Compression totale, 20s repos",dose:"3x20s",repos:20,vid:"https://www.youtube.com/watch?v=oEaRgZXVkIM"},
+        {n:"Planche RKC",cue:"Gainage actif 100pct",dose:"3x30s",repos:30,vid:"https://www.youtube.com/watch?v=K0FlFt4FD4E"},
+        {n:"Dead bug",cue:"Transverse profond, 45s repos",dose:"3x10 alt.",repos:45,vid:"https://www.youtube.com/watch?v=zJMNbNYYrsY"},
+      ]},
+    ]
+  },
+  S4:{id:"S4",l:"PULL COURT",e:"&#x1F519;",c:"#33aaff",bg:"rgba(51,170,255,.1)",d:"35 min",desc:"Dos uniquement",
+    blocs:[
+      {t:"DOS",col:"#33aaff",exos:[
+        {n:"Row assis elastique",cue:"Grand dorsal + rhomboides, 75s repos",dose:"4x12",repos:75,vid:"https://www.youtube.com/watch?v=S1NIN1z4z9Q"},
+        {n:"Row unilateral debout",cue:"Coude vers hanche, 60s repos",dose:"3x12/cote",repos:60,vid:"https://www.youtube.com/watch?v=S1NIN1z4z9Q"},
+        {n:"Superman en W",cue:"Omoplates 3s, erecteurs",dose:"3x12",repos:60,vid:"https://www.youtube.com/watch?v=4MP8yZbxI1k"},
+      ]},
+    ]
+  },
+  S5:{id:"S5",l:"BRAS",e:"&#x1F4AA;",c:"#aa55ff",bg:"rgba(170,85,255,.1)",d:"35 min",desc:"Biceps, Triceps, Epaules",
+    blocs:[
+      {t:"BICEPS",col:"#aa55ff",exos:[
+        {n:"Curl biceps elastique",cue:"Pied sur bande, 3s descente, supination en haut",dose:"4x12",repos:60,vid:"https://www.youtube.com/watch?v=0sw0ta1G01E"},
+        {n:"Curl marteau elastique",cue:"Prise neutre, coudes fixes",dose:"3x12",repos:60,vid:"https://www.youtube.com/watch?v=0sw0ta1G01E"},
+      ]},
+      {t:"TRICEPS",col:"#aa55ff",exos:[
+        {n:"Triceps extension overhead",cue:"Bande dans le dos, chef long, 3s excentrique",dose:"3x12",repos:60,vid:"https://www.youtube.com/watch?v=FiUJ8jq1z1c"},
+        {n:"Dips entre 2 chaises",cue:"Corps droit, 3s descente",dose:"3x10",repos:60,vid:"https://www.youtube.com/watch?v=MxVbNel13Ek"},
+      ]},
+      {t:"EPAULES",col:"#ff8c2a",exos:[
+        {n:"Elevations laterales elastique",cue:"Deltoide moyen, hauteur epaule, 45s repos",dose:"3x15",repos:45,vid:"https://www.youtube.com/watch?v=AOcge5kTgJ4"},
+        {n:"Face pull elastique",cue:"Epaule arriere, rotation externe, 45s repos",dose:"3x15",repos:45,vid:"https://www.youtube.com/watch?v=i-hVYySziaU"},
+      ]},
+    ]
+  },
+  S6:{id:"S6",l:"LEGS LONG",e:"&#x1F351;",c:"#f5a623",bg:"rgba(245,166,35,.1)",d:"60 min",desc:"Fessiers, Ischios, Quadris, Abdos",
+    blocs:[
+      {t:"FESSIERS",col:"#f5a623",exos:[
+        {n:"Hip Thrust elastique",cue:"Epaules sur canape, serre fessiers 2s en haut, RIR=1",dose:"4x15",repos:90,vid:"https://www.youtube.com/watch?v=BmAxC0OXTto"},
+        {n:"Clamshell elastique",cue:"Couche cote, elastique genoux, ouvre hanche, moyen fessier",dose:"3x20/cote",repos:60,vid:"https://www.youtube.com/watch?v=ZrSBA8j-KGg"},
+        {n:"Kickback a 4 pattes",cue:"Elastique cheville, pousse talon arriere, extension hanche",dose:"3x15/cote",repos:60,vid:"https://www.youtube.com/watch?v=DFEWLNMcyJM"},
+        {n:"Monster walk lateral",cue:"Mini-bande chevilles, pas lateraux, moyen fessier",dose:"3x20 pas",repos:60,vid:"https://www.youtube.com/watch?v=ZrSBA8j-KGg"},
+      ]},
+      {t:"ISCHIOS + QUADRIS",col:"#f5a623",exos:[
+        {n:"Good morning elastique",cue:"Bande epaules, inclinaison avant, dos plat, 3s descente",dose:"3x12",repos:75,vid:"https://www.youtube.com/watch?v=eYXN9SW2j4I"},
+        {n:"Squat sumo lent",cue:"Pieds ecartes, descente 4s, genoux ext, fessiers + adducteurs",dose:"4x12",repos:75,vid:"https://www.youtube.com/watch?v=34xR5kn02xY"},
+        {n:"Fente arriere elastique",cue:"Pied arriere loin, genou avant sur cheville, fessier dominant",dose:"3x10/cote",repos:60,vid:"https://www.youtube.com/watch?v=34xR5kn02xY"},
+      ]},
+      {t:"ABDOS",col:"#2ad98a",exos:[
+        {n:"Wood chop elastique",cue:"Rotation diagonale, obliques, 45s repos",dose:"4x12/cote",repos:45,vid:"https://www.youtube.com/watch?v=i-hVYySziaU"},
+        {n:"Hollow body hold",cue:"Compression totale, 20s repos",dose:"4x20s",repos:20,vid:"https://www.youtube.com/watch?v=oEaRgZXVkIM"},
+        {n:"Dead bug",cue:"Transverse profond, 45s repos",dose:"3x10 alt.",repos:45,vid:"https://www.youtube.com/watch?v=zJMNbNYYrsY"},
+      ]},
+    ]
+  },
+  S7:{id:"S7",l:"LEGS COURT",e:"&#x1F351;",c:"#f5a623",bg:"rgba(245,166,35,.1)",d:"30 min",desc:"Fessiers uniquement",
+    blocs:[
+      {t:"FESSIERS",col:"#f5a623",exos:[
+        {n:"Hip Thrust elastique",cue:"2s serre en haut, RIR=1, 90s repos",dose:"4x15",repos:90,vid:"https://www.youtube.com/watch?v=BmAxC0OXTto"},
+        {n:"Clamshell elastique",cue:"Moyen fessier, 60s repos",dose:"3x20/cote",repos:60,vid:"https://www.youtube.com/watch?v=ZrSBA8j-KGg"},
+        {n:"Kickback a 4 pattes",cue:"Extension hanche isolee, 60s repos",dose:"3x15/cote",repos:60,vid:"https://www.youtube.com/watch?v=DFEWLNMcyJM"},
+      ]},
+    ]
+  },
+  S8:{id:"S8",l:"FULL BODY",e:"&#x26A1;",c:"#2ad98a",bg:"rgba(42,217,138,.1)",d:"70 min",desc:"Corps entier, Core max",
+    blocs:[
+      {t:"FULL BODY",col:"#2ad98a",exos:[
+        {n:"Pompes archer lentes",cue:"4s excentrique, RIR=0, progression vs S1",dose:"4x6/cote",repos:90,vid:"https://www.youtube.com/watch?v=C7CT9zZId5w"},
+        {n:"Row elastique unilateral",cue:"3s excentrique, 60s repos",dose:"3x12/cote",repos:60,vid:"https://www.youtube.com/watch?v=S1NIN1z4z9Q"},
+        {n:"Hip Thrust elastique lourd",cue:"Resistance max, RIR=0 vs S6",dose:"4x15",repos:90,vid:"https://www.youtube.com/watch?v=BmAxC0OXTto"},
+        {n:"Elevations lat + Face pull",cue:"Superset, 45s entre supersets",dose:"3x15+15",repos:45,vid:"https://www.youtube.com/watch?v=AOcge5kTgJ4"},
+        {n:"Squat sumo elastique",cue:"4s descente, genoux ext, 75s repos",dose:"3x12",repos:75,vid:"https://www.youtube.com/watch?v=34xR5kn02xY"},
+      ]},
+      {t:"ABDOS INTENSIF",col:"#2ad98a",exos:[
+        {n:"Dead bug",cue:"Transverse profond, 45s repos",dose:"4x10 alt.",repos:45,vid:"https://www.youtube.com/watch?v=zJMNbNYYrsY"},
+        {n:"Planche RKC",cue:"Gainage actif 100pct",dose:"4x30s",repos:30,vid:"https://www.youtube.com/watch?v=K0FlFt4FD4E"},
+        {n:"Wood chop elastique",cue:"Obliques, taille, 45s repos",dose:"4x12/cote",repos:45,vid:"https://www.youtube.com/watch?v=i-hVYySziaU"},
+        {n:"Hollow body hold",cue:"Compression totale, 20s repos",dose:"4x20s",repos:20,vid:"https://www.youtube.com/watch?v=oEaRgZXVkIM"},
+      ]},
+    ]
+  },
+  S9:{id:"S9",l:"MOBILITY",e:"&#x1F9D8;",c:"#aa55ff",bg:"rgba(170,85,255,.1)",d:"45 min",desc:"Flow corps entier, Yoga, Recuperation",
+    blocs:[
+      {t:"FLOW CORPS ENTIER",col:"#aa55ff",exos:[
+        {n:"Chat Vache lent",cue:"15 cycles, 5s par cycle, chaque vertebre individuellement",dose:"15 cycles",repos:0,vid:"https://www.youtube.com/watch?v=4MP8yZbxI1k"},
+        {n:"World Greatest Stretch",cue:"8/cote, 5s hold, activation globale",dose:"8/cote",repos:0,vid:"https://www.youtube.com/watch?v=4MP8yZbxI1k"},
+        {n:"Lezard avec rotation",cue:"Fente profonde avant-bras sol, tourne buste, 90s/cote",dose:"90s/cote",repos:0,vid:"https://www.youtube.com/watch?v=4MP8yZbxI1k"},
+        {n:"Pigeon couche actif",cue:"2 min/cote, contracte fessier 5s toutes les 30s",dose:"2 min/cote",repos:0,vid:"https://www.youtube.com/watch?v=4MP8yZbxI1k"},
+        {n:"Torsion assise profonde",cue:"Assis, jambe allongee, bras contre genou, 90s/cote",dose:"90s/cote",repos:0,vid:"https://www.youtube.com/watch?v=4MP8yZbxI1k"},
+        {n:"Thread the Needle",cue:"A 4 pattes, glisse bras sous corps, rotation thoracique, 3s",dose:"10/cote",repos:0,vid:"https://www.youtube.com/watch?v=4MP8yZbxI1k"},
+        {n:"Chien tete en bas actif",cue:"Talons alternes 3s, 2 min, chaine posterieure complete",dose:"2 min",repos:0,vid:"https://www.youtube.com/watch?v=4MP8yZbxI1k"},
+        {n:"Shavasana consciente",cue:"5 min, scan corps tete aux pieds, systeme parasympathique",dose:"5 min",repos:0,vid:"https://www.youtube.com/watch?v=4MP8yZbxI1k"},
+      ]},
+    ]
+  },
+  S10:{id:"S10",l:"NATATION",e:"&#x1F30A;",c:"#33aaff",bg:"rgba(51,170,255,.1)",d:"libre",desc:"Distance + Duree, Objectif 3000m",typ:"libre"},
+  S11:{id:"S11",l:"MARCHE",e:"&#x1F6B6;",c:"#aa55ff",bg:"rgba(170,85,255,.1)",d:"libre",desc:"Zone 2, Duree + Distance Var",typ:"libre"},
+  S12:{id:"S12",l:"APHRODITE",e:"&#x1F525;",c:"#a8d800",bg:"rgba(168,216,0,.1)",d:"40 min",desc:"50-40-30-20-10 Burpees Squat Crunch",typ:"chrono"},
+};
+
+const JOURS=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+const SK="n50v6";
+let DB={poids:[],masse:[],seances:[],plan:{},abdos:{}};
+function load(){try{const r=localStorage.getItem(SK);if(r)DB=Object.assign(DB,JSON.parse(r));}catch(e){}}
+function save(){try{localStorage.setItem(SK,JSON.stringify(DB));fl();}catch(e){}}
+function fl(){const b=document.getElementById("sync-b");b.classList.add("show");setTimeout(()=>b.classList.remove("show"),1400);}
+
+const TODAY=new Date().toISOString().split("T")[0];
+const WS=(()=>{const d=new Date();d.setHours(0,0,0,0);const dy=d.getDay();d.setDate(d.getDate()-(dy===0?6:dy-1));return d.toISOString().split("T")[0];})();
+const WE=(()=>{const d=new Date(WS);d.setDate(d.getDate()+6);return d.toISOString().split("T")[0];})();
+function wd7(){return Array.from({length:7},(_,i)=>{const d=new Date(WS);d.setDate(d.getDate()+i);return d.toISOString().split("T")[0];});}
+function pws(){const d=new Date(WS);d.setDate(d.getDate()-7);return d.toISOString().split("T")[0];}
+function pwe(){const d=new Date(WE);d.setDate(d.getDate()-7);return d.toISOString().split("T")[0];}
+function sip(s,e){return DB.seances.filter(r=>r.date>=s&&r.date<=e);}
+function fs(iso){return iso?new Date(iso+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"short"}):"";} 
+function ft(s){return Math.floor(s/60).toString().padStart(2,"0")+":"+((s%60).toString().padStart(2,"0"));}
+function mk(d=new Date()){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
+function streak(){let s=0,d=new Date(TODAY);while(true){const k=d.toISOString().split("T")[0];if(DB.seances.find(r=>r.date===k)||DB.abdos[k]?.length){s++;d.setDate(d.getDate()-1);}else break;}return s;}
+
+let curTab="semaine";
+function showTab(t){
+  curTab=t;
+  ["semaine","abdos","rapports","config"].forEach(v=>{
+    document.getElementById("v-"+v).style.display=v===t?"block":"none";
+    document.getElementById("nb-"+v).classList.toggle("on",v===t);
+  });
+  document.querySelectorAll(".tabs .tab").forEach((b,i)=>b.classList.toggle("on",["semaine","abdos","rapports","config"][i]===t));
+  document.getElementById("content").scrollTop=0;
+  if(t==="rapports")renderRap();
+  if(t==="abdos")renderAbdos();
+  if(t==="config")renderConfig();
+}
+
+function renderSem(){
+  const days=wd7(),plan=DB.plan[WS]||{},done=sip(WS,WE),planned=Object.keys(plan).length,str=streak();
+  const sb=document.getElementById("streak-b");document.getElementById("streak-v").textContent=str;sb.style.display=str>0?"flex":"none";
+  const lp=DB.poids.length?DB.poids[DB.poids.length-1]:null;
+  const lm=DB.masse.length?DB.masse[DB.masse.length-1]:null;
+  const cw=lp?lp.kg:79.6,tw=75;
+  const pw=Math.max(0,Math.min(Math.round((79.6-cw)/(79.6-tw)*100),100));
+  const end=new Date("2025-11-30"),tod=new Date(TODAY);
+  const daysLeft=Math.max(0,Math.round((end-tod)/86400000));
+  
+  let h=`<div class="card"><div class="clbl">Semaine en cours</div>
+  <div class="sg" style="margin-bottom:${planned>0?"10px":"0"}">
+    <div class="st"><div class="sv" style="color:var(--lime)">${done.length}</div><div class="sl">FAITES</div></div>
+    <div class="st"><div class="sv" style="color:var(--blue)">${planned||"--"}</div><div class="sl">PREVUES</div></div>
+    <div class="st"><div class="sv" style="color:var(--orange)">${str}</div><div class="sl">STREAK</div></div>
+  </div>
+  ${planned>0?`<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:4px"><span>PROGRESSION</span><span style="color:var(--lime);font-weight:700">${done.length}/${planned}</span></div><div class="pb"><div class="pf" style="width:${Math.min(Math.round(done.length/planned*100),100)}%"></div></div>`:""}
+  </div>
+  
+  <div class="card"><div class="clbl">Saisie poids &amp; masse</div>
+  <div class="sg2" style="margin-bottom:10px">
+    <div><div class="flbl">Poids (kg)</div><div class="prow"><input type="number" step="0.1" class="pinput" id="p-in" placeholder="${lp?lp.kg:"79.6"}"><button class="sbtn" onclick="savePoids()">OK</button></div>${lp?`<div style="font-size:10px;color:var(--muted);margin-top:5px">Dernier: <b style="color:var(--lime)">${lp.kg}kg</b> ${fs(lp.date)}</div>`:""}</div>
+    <div><div class="flbl">Masse musc. (%)</div><div class="prow"><input type="number" step="0.1" class="pinput" id="m-in" placeholder="${lm?lm.pct:"45.0"}"><button class="sbtn" onclick="saveMasse()">OK</button></div>${lm?`<div style="font-size:10px;color:var(--muted);margin-top:5px">Dernier: <b style="color:var(--green)">${lm.pct}%</b></div>`:""}</div>
+  </div></div>
+  
+  <div class="obj-banner">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div><div style="font-size:9px;letter-spacing:2px;color:var(--lime);font-weight:700">OBJECTIF 75kg NOVEMBRE</div>
+      <div style="font-size:13px;font-weight:700;margin-top:2px">Actuel: ${cw}kg vers 75kg</div></div>
+      <div style="text-align:right"><div style="font-size:24px;font-weight:900;color:var(--lime)">${pw}%</div><div style="font-size:9px;color:var(--muted)">atteint</div></div>
+    </div>
+    <div class="pb"><div class="pf" style="width:${pw}%"></div></div>
+    <div style="font-size:10px;color:var(--muted);margin-top:5px">Reste ${Math.max(0,cw-75).toFixed(1)}kg &bull; ${daysLeft} jours</div>
+  </div>
+  
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="clbl" style="margin-bottom:0">Planning semaine</div>
+      <button onclick="document.getElementById('cf-ov').style.display='flex'" style="padding:4px 10px;background:var(--red2);border:1px solid rgba(255,68,85,.25);color:var(--red);border-radius:8px;font-size:10px;font-weight:700;cursor:pointer">Reset</button>
+    </div>`;
+
+  days.forEach((dk,i)=>{
+    const sid=plan[i],s=sid?S[sid]:null,sess=sid?DB.seances.find(r=>r.date===dk&&r.sid===sid):null,isT=dk===TODAY;
+    h+=`<div class="day${isT?" today":""}" style="${s&&sess?`border-color:${s.c}44;background:${s.bg}`:""}">
+      <div class="dtop">
+        <div class="dleft"><div class="dname">${JOURS[i]}${isT?`<span class="dtag">TODAY</span>`:""}<span style="font-size:9px;color:var(--muted)">${dk.slice(5)}</span></div></div>
+        <div class="dctrl">
+          <select class="dsel" onchange="assignDay(${i},this.value)">
+            <option value="">-- Repos --</option>
+            ${Object.values(S).map(se=>`<option value="${se.id}"${sid===se.id?" selected":""}>${se.e} ${se.l}</option>`).join("")}
+          </select>
+          ${s?`<button class="vbtn" onclick="hVal('${dk}','${sid}')" style="${sess?`border-color:${s.c};color:${s.c};background:${s.bg}`:""}">  ${sess?"&#x2713;":"+"}</button>`:""}
+        </div>
+      </div>
+      ${s?`<div class="dmeta"><span class="dpill" style="background:${s.bg};color:${s.c}">${s.e} ${s.l}</span>${sess?rSR(sess,s):""}</div>`:""}
+    </div>`;
+  });
+  h+=`</div>`;
+  document.getElementById("v-semaine").innerHTML=h;
+}
+
+function rSR(sess,s){
+  let h="";
+  const el=ELAS.find(e=>e.id===sess.elas);
+  if(el)h+=`<span class="dpill" style="background:${el.bg};color:${el.color}">${el.ico} ${el.label}</span>`;
+  if(sess.dist)h+=`<span class="dpill" style="color:var(--blue)">${sess.dist}m ${sess.duree}min</span>`;
+  if(sess.temps>0)h+=`<span class="dpill" style="color:var(--lime)">${ft(sess.temps)} ${sess.series||0}/5</span>`;
+  if(sess.dureeC)h+=`<span class="dpill" style="color:var(--purple)">${sess.dureeC}min${sess.km?" "+sess.km+"km":""}</span>`;
+  if(sess.sT)h+=`<span class="dpill">${sess.sT}s ${sess.rT}r</span>`;
+  return h;
+}
+
+function assignDay(i,sid){if(!DB.plan[WS])DB.plan[WS]={};if(sid)DB.plan[WS][i]=sid;else delete DB.plan[WS][i];save();renderSem();}
+
+function hVal(dk,sid){
+  const ex=DB.seances.find(r=>r.date===dk&&r.sid===sid);
+  if(ex){DB.seances=DB.seances.filter(r=>!(r.date===dk&&r.sid===sid));save();renderSem();return;}
+  openM(dk,sid);
+}
+
+function savePoids(){const v=parseFloat(document.getElementById("p-in").value);if(!v||v<30||v>300)return;DB.poids=DB.poids.filter(p=>p.date!==TODAY);DB.poids.push({date:TODAY,kg:v});DB.poids.sort((a,b)=>a.date.localeCompare(b.date));document.getElementById("p-in").value="";save();renderSem();}
+function saveMasse(){const v=parseFloat(document.getElementById("m-in").value);if(!v||v<10||v>70)return;DB.masse=DB.masse.filter(p=>p.date!==TODAY);DB.masse.push({date:TODAY,pct:v});DB.masse.sort((a,b)=>a.date.localeCompare(b.date));document.getElementById("m-in").value="";save();renderSem();}
+function doReset(){DB.seances=DB.seances.filter(r=>r.date<WS||r.date>WE);delete DB.plan[WS];save();renderSem();document.getElementById("cf-ov").style.display="none";}
+
+// ABDOS
+function renderAbdos(){
+  const done=DB.abdos[TODAY]||[];
+  const total=Object.values(DB.abdos).filter(a=>a&&a.length>0).length;
+  let h=`<div class="card"><div class="clbl">Abdos du jour ${fs(TODAY)}</div>
+  <div class="sg" style="margin-bottom:12px">
+    <div class="st"><div class="sv" style="color:var(--green)">${done.length}/4</div><div class="sl">EXERCICES</div></div>
+    <div class="st"><div class="sv" style="color:var(--lime)">${total}</div><div class="sl">JOURS TOTAL</div></div>
+    <div class="st"><div class="sv" style="color:var(--gold)">${Object.keys(DB.abdos).filter(k=>DB.abdos[k]?.length===4).length}</div><div class="sl">COMPLETS</div></div>
+  </div>
+  <div class="pb" style="margin-bottom:14px;background:var(--s3)"><div class="pf" style="width:${done.length/4*100}%;background:var(--green)"></div></div>
+  <div class="abdo-grid">
+    ${ABDOS.map(a=>`<div class="abdo-btn${done.includes(a.id)?" done":""}" onclick="togA('${a.id}')">${done.includes(a.id)?"✓ ":""}<b>${a.nom.split(" ")[0]}</b><br><span style="font-size:9px;opacity:.7">${a.dose}</span></div>`).join("")}
+  </div></div>
+  <div class="card"><div class="clbl">Detail exercices</div>
+  ${ABDOS.map(a=>`<div class="exo-item" style="border-left-color:var(--green)">
+    <div class="exo-top"><div class="exo-name">${a.nom}</div><div class="exo-dose">${a.dose}</div></div>
+    <div class="exo-cue">${a.cue}</div>
+    <div style="display:flex;align-items:center;gap:8px"><a class="vid-btn" href="${a.vid}" target="_blank">Video</a><span style="font-size:10px;color:var(--muted)">Repos ${a.repos}s</span><button onclick="startR(${a.repos},'${a.nom}')" style="padding:3px 8px;border-radius:7px;border:1px solid var(--b2);background:transparent;color:var(--muted);font-size:10px;cursor:pointer">Chrono</button></div>
+  </div>`).join("")}
+  </div>`;
+  document.getElementById("v-abdos").innerHTML=h;
+}
+
+function togA(id){if(!DB.abdos[TODAY])DB.abdos[TODAY]=[];const i=DB.abdos[TODAY].indexOf(id);if(i>=0)DB.abdos[TODAY].splice(i,1);else DB.abdos[TODAY].push(id);save();renderAbdos();}
+
+// MODAL
+let _M=null,_ED={},_cT=0,_cR=false,_cI=null,_sD=new Set(),_rI=null,_rT=0;
+
+function openM(dk,sid){
+  const s=S[sid];if(!s)return;
+  _M={dk,sid,s};_ED={};_cT=0;_cR=false;clearInterval(_cI);_sD=new Set();
+  const PWS=pws(),PWE=pwe();
+  const prevS=DB.seances.filter(r=>r.sid===sid&&r.date>=PWS&&r.date<=PWE);
+
+  let h=`<div class="mhdr"><div><div class="mtitle" style="color:${s.c}">${s.e} ${s.l}</div><div class="msub">${fs(dk)} ${s.d}</div></div><button class="xcls" onclick="closeM()">x</button></div>`;
+
+  if(s.typ==="libre"){
+    if(sid==="S10"){
+      h+=`<div class="ngrid"><div class="nbox"><label>Distance (m)</label><input type="number" id="f-dist" value="3000"></div><div class="nbox"><label>Duree (min)</label><input type="number" id="f-duree" value="40"></div></div>
+      <div class="flbl">Note</div><textarea class="note-ta" id="f-note" rows="2" placeholder="Palmes? Plaquettes? Sensations..."></textarea>
+      <div class="mbtns"><button class="cbtn" onclick="closeM()">Annuler</button><button class="okbtn" style="background:${s.bg};color:${s.c}" onclick="vL('nat')">Valider</button></div>`;
+    }else{
+      h+=`<div class="ngrid"><div class="nbox"><label>Duree (min)</label><input type="number" id="f-dc" value="45"></div><div class="nbox"><label>Distance (km)</label><input type="number" id="f-km" placeholder="5.2" step="0.1"></div></div>
+      <div class="flbl">Note</div><textarea class="note-ta" id="f-note" rows="2" placeholder="Itineraire, meteo Var..."></textarea>
+      <div class="mbtns"><button class="cbtn" onclick="closeM()">Annuler</button><button class="okbtn" style="background:${s.bg};color:${s.c}" onclick="vL('mar')">Valider</button></div>`;
+    }
+  } else if(s.typ==="chrono"){
+    h+=`<div class="flbl">Series completees</div>
+    <div class="sgrid">${[50,40,30,20,10].map((r,i)=>`<button class="ssbtn" id="sr-${i}" onclick="togS(${i})">${r}<br><span style="font-size:8px;opacity:.6">reps</span></button>`).join("")}</div>
+    <div class="flbl">Chronometre</div>
+    <div class="chrono"><div class="ctime" id="c-d" style="color:var(--lime)">00:00</div>
+    <div class="cbtns"><button class="cplay" id="c-p" onclick="togC()" style="background:var(--lime2);color:var(--lime)">Start</button><button class="creset" onclick="resC()">Reset</button></div></div>
+    <div class="flbl">Note</div><textarea class="note-ta" id="f-note" rows="2" placeholder="Temps vs semaine derniere..."></textarea>
+    <div class="mbtns"><button class="cbtn" onclick="closeM()">Annuler</button><button class="okbtn" style="background:${s.bg};color:${s.c}" onclick="vAph()">Valider</button></div>`;
+  } else {
+    h+=`<div style="margin-bottom:10px;font-size:11px;color:var(--muted)">Coche chaque exercice termine - Lance le chrono de repos apres chaque serie</div>`;
+    s.blocs.forEach((bl,bi)=>{
+      h+=`<div style="margin-bottom:4px;font-size:9px;letter-spacing:2px;color:${bl.col};font-weight:700">${bl.t}</div>`;
+      bl.exos.forEach((ex,ei)=>{
+        const xid=`${bi}-${ei}`;
+        let prev="";
+        const pd=prevS.flatMap(ps=>ps.exos||[]).find(e=>e.n===ex.n);
+        if(pd){const el=ELAS.find(e=>e.id===pd.elas);prev=`Sem.prec.: ${el?el.ico:""} ${pd.reps||"?"}reps`;}
+        h+=`<div class="exo-item" id="x-${xid}" style="border-left-color:${bl.col}">
+          <div class="exo-top">
+            <div class="exo-name">${ex.n}</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="exo-dose">${ex.dose}</div>
+              <button class="exo-check" id="ec-${xid}" onclick="ckX('${xid}')">o</button>
+            </div>
+          </div>
+          <div class="exo-cue">${ex.cue}</div>
+          ${prev?`<div class="exo-prev">${prev}</div>`:""}
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:3px">ELASTIQUE</div>
+            <div class="elas-mini">${ELAS.map(e=>`<button class="em" id="em-${xid}-${e.id}" onclick="sEX('${xid}','${e.id}')" title="${e.label}">${e.ico}</button>`).join("")}</div></div>
+            <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:3px">REPS REELS</div>
+            <input type="number" id="rp-${xid}" placeholder="10" min="0" style="width:55px;padding:5px;border-radius:8px;border:1px solid var(--b2);background:var(--s2);color:var(--text);font-size:14px;font-weight:700;text-align:center;outline:none"></div>
+            ${ex.vid?`<a class="vid-btn" href="${ex.vid}" target="_blank">Video</a>`:""}
+            ${ex.repos>0?`<button onclick="startR(${ex.repos},'${ex.n}')" style="padding:3px 8px;border-radius:7px;border:1px solid var(--b2);background:transparent;color:var(--muted);font-size:10px;cursor:pointer">Repos ${ex.repos}s</button>`:""}
+          </div>
+        </div>`;
+      });
+    });
+    h+=`<div class="flbl" style="margin-top:8px">Note globale</div>
+    <textarea class="note-ta" id="f-note" rows="2" placeholder="Ressenti, progression..."></textarea>
+    <div class="mbtns"><button class="cbtn" onclick="closeM()">Annuler</button><button class="okbtn" style="background:${s.bg};color:${s.c}" onclick="vEl()">Valider seance</button></div>`;
+  }
+  document.getElementById("mbox").innerHTML=h;
+  document.getElementById("mov").style.display="flex";
+}
+
+function ckX(xid){const b=document.getElementById("ec-"+xid),it=document.getElementById("x-"+xid),d=b.classList.contains("done");if(d){b.classList.remove("done");b.textContent="o";it.style.opacity="1";}else{b.classList.add("done");b.textContent="v";it.style.opacity=".6";}}
+function sEX(xid,id){ELAS.forEach(e=>{const b=document.getElementById("em-"+xid+"-"+e.id);if(!b)return;if(e.id===id){b.style.borderColor=e.color;b.style.background=e.bg;}else{b.style.borderColor="";b.style.background="";}});}
+
+function startR(s,n){_rT=s;document.getElementById("repos-ov").style.display="flex";document.getElementById("repos-t").textContent=s;document.getElementById("repos-l").textContent=n;clearInterval(_rI);_rI=setInterval(()=>{_rT--;document.getElementById("repos-t").textContent=_rT;if(_rT<=0){clearInterval(_rI);skipRepos();try{navigator.vibrate&&navigator.vibrate([200,100,200]);}catch(e){}}},1000);}
+function skipRepos(){clearInterval(_rI);document.getElementById("repos-ov").style.display="none";}
+
+function togC(){_cR=!_cR;const b=document.getElementById("c-p");if(_cR){b.textContent="Pause";b.style.background="rgba(255,68,85,.15)";b.style.color="var(--red)";_cI=setInterval(()=>{_cT++;const d=document.getElementById("c-d");if(d)d.textContent=ft(_cT);},1000);}else{b.textContent="Reprendre";b.style.background="var(--lime2)";b.style.color="var(--lime)";clearInterval(_cI);}}
+function resC(){_cT=0;_cR=false;clearInterval(_cI);const d=document.getElementById("c-d");if(d)d.textContent="00:00";const b=document.getElementById("c-p");if(b){b.textContent="Start";b.style.background="var(--lime2)";b.style.color="var(--lime)";}}
+function togS(i){const b=document.getElementById("sr-"+i);if(_sD.has(i)){_sD.delete(i);b.classList.remove("on");}else{_sD.add(i);b.classList.add("on");}}
+
+function vEl(){
+  const s=_M.s;const exos=[];let sT=0,rT=0,ec={};
+  s.blocs.forEach((bl,bi)=>{bl.exos.forEach((ex,ei)=>{
+    const xid=`${bi}-${ei}`,eid=ELAS.find(e=>document.getElementById("em-"+xid+"-"+e.id)?.style.background!=="")?.id||"o";
+    const rp=parseInt(document.getElementById("rp-"+xid)?.value)||0;
+    const dn=document.getElementById("ec-"+xid)?.classList.contains("done");
+    ec[eid]=(ec[eid]||0)+1;if(dn){sT++;rT+=rp;}
+    exos.push({n:ex.n,elas:eid,reps:rp,done:dn});
+  });});
+  const dom=Object.entries(ec).sort((a,b)=>b[1]-a[1])[0]?.[0]||"o";
+  DB.seances.push({date:_M.dk,sid:_M.sid,elas:dom,exos,sT,rT,note:document.getElementById("f-note")?.value||""});
+  save();closeM();renderSem();
+}
+function vL(t){
+  let e={date:_M.dk,sid:_M.sid,note:document.getElementById("f-note")?.value||""};
+  if(t==="nat"){e.dist=parseInt(document.getElementById("f-dist")?.value)||3000;e.duree=parseInt(document.getElementById("f-duree")?.value)||40;}
+  else{e.dureeC=parseInt(document.getElementById("f-dc")?.value)||45;e.km=parseFloat(document.getElementById("f-km")?.value)||null;}
+  DB.seances.push(e);save();closeM();renderSem();
+}
+function vAph(){clearInterval(_cI);DB.seances.push({date:_M.dk,sid:_M.sid,temps:_cT,series:_sD.size,note:document.getElementById("f-note")?.value||""});save();closeM();renderSem();}
+function closeM(){document.getElementById("mov").style.display="none";clearInterval(_cI);clearInterval(_rI);_cR=false;}
+function closeMov(e){if(e.target.id==="mov")closeM();}
+
+// RAPPORTS
+let rT="hebdo";
+function setRT(t){rT=t;document.querySelectorAll(".rtab").forEach((b,i)=>b.classList.toggle("on",["hebdo","mensuel","annuel"][i]===t));renderRap();}
+
+function renderRap(){
+  const m=mk(),y=TODAY.slice(0,4);
+  let kpis=[],bars=[],bLbl="",rLbl="";
+  if(rT==="hebdo"){
+    const d=sip(WS,WE).length,pl=Object.keys(DB.plan[WS]||{}).length,pd=sip(pws(),pwe()).length;
+    kpis=[{v:d,l:"FAITES",c:"var(--lime)"},{v:pl||"--",l:"PREVUES",c:"var(--blue)"},{v:pd,l:"SEM.PREC.",c:"var(--orange)"}];
+    bars=Array.from({length:8},(_,i)=>{const d2=new Date();d2.setDate(d2.getDate()-(7-i)*7);const ws=(()=>{const c=new Date(d2);c.setHours(0,0,0,0);const dy=c.getDay();c.setDate(c.getDate()-(dy===0?6:dy-1));return c.toISOString().split("T")[0];})();const we=new Date(new Date(ws).getTime()+6*86400000).toISOString().split("T")[0];return{l:ws.slice(5,10),v:sip(ws,we).length};});
+    bLbl="Seances / 8 semaines";rLbl="Bilan semaine";
+  } else if(rT==="mensuel"){
+    const md=sip(m+"-01",m+"-31").length,lp=DB.poids.length?DB.poids[DB.poids.length-1].kg:"--",lm=DB.masse.length?DB.masse[DB.masse.length-1].pct+"%":"--";
+    kpis=[{v:md,l:"SEANCES",c:"var(--lime)"},{v:lp,l:"POIDS KG",c:"var(--blue)"},{v:lm,l:"MASSE MUSC",c:"var(--green)"}];
+    bars=Array.from({length:6},(_,i)=>{const d=new Date();d.setMonth(d.getMonth()-5+i);const mm=mk(d);return{l:mm.slice(5),v:sip(mm+"-01",mm+"-31").length};});
+    bLbl="Seances / 6 mois";rLbl="Bilan mois";
+  } else {
+    const yd=sip(y+"-01-01",y+"-12-31").length;
+    kpis=[{v:yd,l:"SEANCES",c:"var(--lime)"},{v:DB.seances.filter(r=>r.sid==="S12").length,l:"APHRODITE",c:"var(--gold)"},{v:DB.seances.filter(r=>r.sid==="S10").length,l:"PISCINES",c:"var(--blue)"}];
+    bars=Array.from({length:12},(_,i)=>{const d=new Date(y+"-01-01");d.setMonth(i);const mm=mk(d);return{l:mm.slice(5),v:sip(mm+"-01",mm+"-31").length};});
+    bLbl="Seances / mois";rLbl="Bilan annee";
+  }
+
+  const pp=DB.poids.slice(-10),mp=DB.masse.slice(-10);
+  const aphS=DB.seances.filter(r=>r.sid==="S12"&&r.temps>0).slice(-8);
+  const natS=DB.seances.filter(r=>r.sid==="S10"&&r.dist>0).slice(-8);
+  const tc={};DB.seances.forEach(r=>{tc[r.sid]=(tc[r.sid]||0)+1;});
+  const tot=DB.seances.length||1;
+
+  let h=`<div class="rtabs">
+    <button class="rtab${rT==="hebdo"?" on":""}" onclick="setRT('hebdo')">HEBDO</button>
+    <button class="rtab${rT==="mensuel"?" on":""}" onclick="setRT('mensuel')">MENSUEL</button>
+    <button class="rtab${rT==="annuel"?" on":""}" onclick="setRT('annuel')">ANNUEL</button>
+  </div>
+  <div class="card"><div class="clbl">${rLbl}</div><div class="sg">${kpis.map(k=>`<div class="st"><div class="sv" style="color:${k.c}">${k.v}</div><div class="sl">${k.l}</div></div>`).join("")}</div></div>
+  <div class="card"><div class="clbl">${bLbl}</div><div class="barchart">${rB(bars)}</div></div>`;
+
+  if(pp.length>1||mp.length>1){
+    h+=`<div class="card"><div class="clbl">Poids &amp; Masse musculaire</div>`;
+    if(pp.length>1){const diff=pp[pp.length-1].kg-pp[0].kg;h+=`<div style="font-size:9px;color:var(--blue);margin-bottom:4px;letter-spacing:1px">POIDS (kg)</div><div class="barchart">${rBC(pp.map(p=>({l:p.date.slice(5),v:p.kg})),"var(--blue)")}</div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:10px"><span>${fs(pp[0].date)}</span><span style="font-weight:700;color:${diff<=0?"var(--green)":"var(--red)"}">${diff>=0?"+":""}${diff.toFixed(1)}kg</span><span>${fs(pp[pp.length-1].date)}</span></div>`;}
+    if(mp.length>1){const diff=mp[mp.length-1].pct-mp[0].pct;h+=`<div style="font-size:9px;color:var(--green);margin-bottom:4px;letter-spacing:1px">MASSE MUSCULAIRE (%)</div><div class="barchart">${rBC(mp.map(p=>({l:p.date.slice(5),v:p.pct})),"var(--green)")}</div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted)"><span>${fs(mp[0].date)}</span><span style="font-weight:700;color:${diff>=0?"var(--green)":"var(--red)"}">${diff>=0?"+":""}${diff.toFixed(1)}%</span><span>${fs(mp[mp.length-1].date)}</span></div>`;}
+    h+=`</div>`;
+  }
+
+  if(aphS.length>1){h+=`<div class="card"><div class="clbl">Progression Aphrodite (temps)</div><div class="barchart">${rBC(aphS.map(r=>({l:r.date.slice(5),v:r.temps})),"var(--lime)")}</div><div style="font-size:10px;color:var(--muted);margin-top:4px">Courbe qui descend = tu progresses</div></div>`;}
+  if(natS.length>1){h+=`<div class="card"><div class="clbl">Progression natation</div><div class="barchart">${rBC(natS.map(r=>({l:r.date.slice(5),v:r.dist})),"var(--blue)")}</div><div style="font-size:10px;color:var(--muted);margin-top:4px">Objectif 3000m par seance</div></div>`;}
+
+  h+=`<div class="card"><div class="clbl">Repartition par seance</div>${Object.entries(tc).sort((a,b)=>b[1]-a[1]).map(([sid,cnt])=>{const s=S[sid];if(!s)return"";return`<div class="rrow"><div class="rname" style="color:${s.c}">${s.e} ${s.l.split(" ")[0]}</div><div class="rbar"><div class="rfill" style="width:${Math.round(cnt/tot*100)}%;background:${s.c}"></div></div><div class="rcnt" style="color:${s.c}">${cnt}</div></div>`;}).join("")||`<div class="empty">Aucune seance</div>`}</div>`;
+
+  h+=`<div class="card"><div class="clbl">Historique recent</div>${[...DB.seances].reverse().slice(0,12).map(r=>{const s=S[r.sid];if(!s)return"";const el=ELAS.find(e=>e.id===r.elas);let det="";if(r.temps>0)det=ft(r.temps);else if(r.dist)det=r.dist+"m";else if(r.dureeC)det=r.dureeC+"min";else if(r.sT)det=r.sT+"s";return`<div class="hrow"><div class="hl"><span class="hico">${s.e}</span><div><div class="hname" style="color:${s.c}">${s.l}</div><div class="hdate">${fs(r.date)}</div></div></div><div class="hrr">${el?el.ico+" ":""}${det}</div></div>`;}).join("")||`<div class="empty">Aucune seance</div>`}</div>`;
+
+  document.getElementById("v-rapports").innerHTML=h;
+}
+
+function rB(bars){const mx=Math.max(...bars.map(b=>b.v),1);return bars.map(b=>`<div class="bw"><div class="bv">${b.v||""}</div><div class="bbg"><div class="bfill" style="height:${Math.round(b.v/mx*100)}%"></div></div><div class="blbl">${b.l}</div></div>`).join("");}
+function rBC(bars,col){if(!bars.length)return"";const vals=bars.map(b=>b.v),mn=Math.min(...vals),mx=Math.max(...vals),rng=mx-mn||1;return bars.map(b=>`<div class="bw"><div class="bv" style="color:${col};font-size:8px">${b.v}</div><div class="bbg"><div class="bfill" style="height:${Math.round((b.v-mn+rng*.1)/(rng*1.1)*100)}%;background:${col}"></div></div><div class="blbl">${b.l}</div></div>`).join("");}
+
+// CONFIG
+function renderConfig(){
+  document.getElementById("v-config").innerHTML=`
+  <div class="card"><div class="clbl">Stats globales</div>
+  <div class="sg">
+    <div class="st"><div class="sv" style="color:var(--lime)">${DB.seances.length}</div><div class="sl">SEANCES</div></div>
+    <div class="st"><div class="sv" style="color:var(--green)">${Object.values(DB.abdos).filter(a=>a&&a.length>0).length}</div><div class="sl">JOURS ABDOS</div></div>
+    <div class="st"><div class="sv" style="color:var(--blue)">${DB.poids.length}</div><div class="sl">PESEES</div></div>
+  </div></div>
+  <div class="card"><div class="clbl">Sauvegarde donnees</div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <button onclick="expD()" style="padding:12px;background:var(--lime2);border:1px solid var(--lime3);color:var(--lime);border-radius:11px;font-size:14px;font-weight:700;cursor:pointer">Exporter mes donnees (JSON)</button>
+    <label style="padding:12px;background:var(--blue2);border:1px solid rgba(51,170,255,.3);color:var(--blue);border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;text-align:center">
+      Importer donnees (JSON)
+      <input type="file" accept=".json" onchange="impD(event)" style="display:none">
+    </label>
+  </div>
+  <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">Exporte regulierement pour sauvegarder. L'import remplace toutes les donnees actuelles.</div></div>
+  <div class="card"><div class="clbl">Programme</div>
+  <div style="font-size:12px;color:var(--muted);line-height:2">
+    S1 Push Long (65min) / S2 Push Court (35min)<br>
+    S3 Pull Long (65min) / S4 Pull Court (35min)<br>
+    S5 Bras (35min) / S6 Legs Long (60min) / S7 Legs Court (30min)<br>
+    S8 Full Body (70min) / S9 Mobility (45min)<br>
+    S10 Natation / S11 Marche / S12 Aphrodite<br>
+    <span style="color:var(--lime);font-weight:700">Objectif: 75kg Novembre 2025 &bull; 6 pack</span>
+  </div></div>`;
+}
+
+function expD(){const json=JSON.stringify(DB,null,2),blob=new Blob([json],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="ironlog-"+TODAY+".json";document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);}
+function impD(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const p=JSON.parse(ev.target.result);if(p.seances!==undefined){DB=Object.assign(DB,p);save();renderSem();alert("Import OK: "+p.seances.length+" seances");}}catch(err){alert("Erreur import: "+err.message);}};r.readAsText(f);}
+
+load();
+renderSem();
+</script>
+</body>
+</html>
